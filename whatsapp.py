@@ -11,7 +11,7 @@ def parse_message(data):
     if msg.get('type') != 'text':
         return None
 
-    return msg['from'], msg['text']['body']
+    return msg['id'], msg['from'], msg['text']['body']
 
 
 def send_message(to, text):

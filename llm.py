@@ -9,12 +9,14 @@ SYSTEM_PROMPT = (
     "(Bengali or English)."
 )
 
-def get_reply(user_text):
+def get_reply(user_text, history=None):
+    history = history or []
     try:
         response = client.chat.completions.create(
             model="openai/gpt-oss-120b",
             messages=[
                 {'role': 'system', 'content': SYSTEM_PROMPT},
+                *history,
                 {'role': 'user', 'content': user_text}
             ],
             temperature=0.7,

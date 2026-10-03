@@ -2,6 +2,7 @@ from flask import Flask, request
 import config
 import whatsapp
 import llm
+import memory
 
 app = Flask(__name__)
 
@@ -27,12 +28,25 @@ def receive():
     if msg is None:
         return 'ok', 200
 
-    sender, text = msg
+    msg_id, sender, text = msg
+
+    if memory.already_processed(msg_id):
+        print("Duplicate skipped:", msg_id)
+        return "ok", 200
+
     print(f"From {sender}: {text}")
 
-    reply = llm.get_reply(text)
-    whatsapp.send_message(sender, reply)
+    if text.strip().lower() == 'stareset':
+        memory.clear(sender)
+        whatsapp.send_message(sender, "Chat history cleared")
+        return "ok", 200
+
     
+    history = memory.get_history(sender)
+    reply = llm.get_reply(text, history)
+    memory.save(sender, text, reply)
+    whatsapp.send_message(sender, reply)
+
     return "ok", 200
 
 if __name__ == "__main__":
